@@ -90,7 +90,7 @@ namespace WindowsFormsApplication2
                 }
 
             }
-            catch (Exception ex)
+            catch (Exception ex) // test
             {
                 MessageBox.Show(ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
