@@ -26,7 +26,7 @@ namespace WindowsFormsApplication2
         private void Form3_Load(object sender, EventArgs e)
         {
             
-                sqlConnection = new SqlConnection(@"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=C:\Users\50we\Desktop\эт\WindowsFormsApplication2\WindowsFormsApplication2\MainData.mdf;Integrated Security=True");
+                sqlConnection = new SqlConnection(@"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=C:\Users\0neekОЗZ7\Desktop\эт\WindowsFormsApplication2\WindowsFormsApplication2\bin\Debug\MainData.mdf;Integrated Security=True");
                 sqlConnection.Open();
                 LoadData();
             

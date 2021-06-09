@@ -26,7 +26,7 @@ namespace WindowsFormsApplication2
         {
             try
             {
-                sqlDataAdapter = new SqlDataAdapter("SELECT *, 'Delete' AS [Command] FROM Purchase", sqlConnection);
+                sqlDataAdapter = new SqlDataAdapter("SELECT *, 'Delete' AS [Удалить], 'Kick' AS [Черный список] FROM Purchase WHERE BlackList = 0", sqlConnection);
                 sqlBuilder = new SqlCommandBuilder(sqlDataAdapter);
                 sqlBuilder.GetInsertCommand();
                 sqlBuilder.GetUpdateCommand();
@@ -34,10 +34,13 @@ namespace WindowsFormsApplication2
                 dataSet = new DataSet();
                 sqlDataAdapter.Fill(dataSet, "Purchase");
                 dataGridView1.DataSource = dataSet.Tables["Purchase"];
+                dataGridView1.Columns[6].Visible = false;
                 for (int i = 0; i < dataGridView1.Rows.Count; i++)
                 {
                     DataGridViewLinkCell linkCell = new DataGridViewLinkCell();
-                    dataGridView1[6, i] = linkCell;
+                    dataGridView1[7, i] = linkCell;
+                    DataGridViewLinkCell linkKick = new DataGridViewLinkCell();
+                    dataGridView1[8, i] = linkKick;
                 }
 
             }
@@ -45,6 +48,33 @@ namespace WindowsFormsApplication2
             {
                MessageBox.Show(ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
            }
+        }
+        private void LoadBlackList()
+        {
+            try
+            {
+                sqlDataAdapter = new SqlDataAdapter("SELECT *, 'Delete' AS [Удалить], 'Remove' AS [Черный список] FROM Purchase WHERE BlackList = 1", sqlConnection);
+                sqlBuilder = new SqlCommandBuilder(sqlDataAdapter);
+                sqlBuilder.GetInsertCommand();
+                sqlBuilder.GetUpdateCommand();
+                sqlBuilder.GetDeleteCommand();
+                dataSet = new DataSet();
+                sqlDataAdapter.Fill(dataSet, "Purchase");
+                dataGridView1.DataSource = dataSet.Tables["Purchase"];
+                dataGridView1.Columns[6].Visible = false;
+                for (int i = 0; i < dataGridView1.Rows.Count; i++)
+                {
+                    DataGridViewLinkCell linkCell = new DataGridViewLinkCell();
+                    DataGridViewLinkCell linkKick = new DataGridViewLinkCell();
+                    dataGridView1[7, i] = linkKick;
+                    dataGridView1[8, i] = linkCell;
+                }
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
         private void ReloadData()
         {
@@ -56,7 +86,7 @@ namespace WindowsFormsApplication2
                 for (int i = 0; i < dataGridView1.Rows.Count; i++)
                 {
                     DataGridViewLinkCell linkCell = new DataGridViewLinkCell();
-                    dataGridView1[6, i] = linkCell;
+                    dataGridView1[7, i] = linkCell;
                 }
 
             }
@@ -67,7 +97,7 @@ namespace WindowsFormsApplication2
         }
         private void Form2_Load(object sender, EventArgs e)
         {
-            sqlConnection = new SqlConnection(@"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=C:\Users\50we\Desktop\эт\WindowsFormsApplication2\WindowsFormsApplication2\MainData.mdf;Integrated Security=True");
+            sqlConnection = new SqlConnection(@"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=C:\Users\0neekОЗZ7\Desktop\эт\WindowsFormsApplication2\WindowsFormsApplication2\bin\Debug\MainData.mdf;Integrated Security=True");
             sqlConnection.Open();
             LoadData();
         }
@@ -87,17 +117,39 @@ namespace WindowsFormsApplication2
         {
             ReloadData();
         }
-
-
-      
-
         private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
             try
             {
-                if (e.ColumnIndex == 6)
+                string task = string.Empty;
+                if (e.ColumnIndex == 8)
                 {
-                    string task = dataGridView1.Rows[e.RowIndex].Cells[6].Value.ToString();
+                    task = dataGridView1.Rows[e.RowIndex].Cells[8].Value.ToString();
+                    if (task == "Remove")
+                    {
+                        if (MessageBox.Show("Убрать из черного списка? Поставщик вернется в белый список", "Изменение", MessageBoxButtons.YesNo, MessageBoxIcon.Question)
+                            == DialogResult.Yes)
+                        {
+                            int rowIndex = e.RowIndex;
+                            dataSet.Tables["Purchase"].Rows[rowIndex]["BlackList"] = "0";
+                            sqlDataAdapter.Update(dataSet, "Purchase");
+                        }
+                    }
+                    if (task == "Kick")
+                    {
+                        if (MessageBox.Show("Добавить в черный список? Поставщик попадет в черный список", "Изменение", MessageBoxButtons.YesNo, MessageBoxIcon.Question)
+                            == DialogResult.Yes)
+                        {
+                            int rowIndex = e.RowIndex;
+                            dataSet.Tables["Purchase"].Rows[rowIndex]["BlackList"] = "1";
+                            sqlDataAdapter.Update(dataSet, "Purchase");
+                        }
+                    }
+                }
+                
+                if (e.ColumnIndex == 7)
+                {
+                    task = dataGridView1.Rows[e.RowIndex].Cells[7].Value.ToString();
                     if (task == "Delete")
                     {
                         if (MessageBox.Show("Удалить эту строку?", "Удаление", MessageBoxButtons.YesNo, MessageBoxIcon.Question)
@@ -109,6 +161,7 @@ namespace WindowsFormsApplication2
                             sqlDataAdapter.Update(dataSet, "Purchase");
                         }
                     }
+                    
                     else if (task == "Insert")
                     {
                         int rowIndex = dataGridView1.Rows.Count - 2;
@@ -121,7 +174,7 @@ namespace WindowsFormsApplication2
                         dataSet.Tables["Purchase"].Rows.Add(row);
                         dataSet.Tables["Purchase"].Rows.RemoveAt(dataSet.Tables["Purchase"].Rows.Count - 1);
                         dataGridView1.Rows.RemoveAt(dataGridView1.Rows.Count - 2);
-                        dataGridView1.Rows[e.RowIndex].Cells[6].Value = "Delete";
+                        dataGridView1.Rows[e.RowIndex].Cells[7].Value = "Delete";
                         sqlDataAdapter.Update(dataSet, "Purchase");
                         newRowAdding = false;
 
@@ -137,9 +190,9 @@ namespace WindowsFormsApplication2
                         sqlDataAdapter.Update(dataSet, "Purchase");
                         dataGridView1.Rows[e.RowIndex].Cells[6].Value = "Delete";
                     }
-                    ReloadData();
+                    
                 }
-
+                ReloadData();
             }
             catch (Exception ex)
             {
@@ -158,7 +211,7 @@ namespace WindowsFormsApplication2
                     int lastRow = dataGridView1.Rows.Count - 2;
                     DataGridViewRow row = dataGridView1.Rows[lastRow];
                     DataGridViewLinkCell linkCell = new DataGridViewLinkCell();
-                    dataGridView1[6, lastRow] = linkCell;
+                    dataGridView1[7, lastRow] = linkCell;
                     row.Cells["Command"].Value = "Insert";
                 }
             }
@@ -177,7 +230,7 @@ namespace WindowsFormsApplication2
                     int rowIndex = dataGridView1.SelectedCells[0].RowIndex;
                     DataGridViewRow editingRow = dataGridView1.Rows[rowIndex];
                     DataGridViewLinkCell linkCell = new DataGridViewLinkCell();
-                    dataGridView1[6, rowIndex] = linkCell;
+                    dataGridView1[7, rowIndex] = linkCell;
                     editingRow.Cells["Command"].Value = "Update";
                 }
 
@@ -263,6 +316,20 @@ namespace WindowsFormsApplication2
         private void Form2_MouseDown(object sender, MouseEventArgs e)
         {
             lastPoint = new Point(e.X, e.Y);
+        }
+
+        private void поставщикиToolStripMenuItem_Click(object sender, EventArgs e) // Поставщики 
+        {
+            поставщикиToolStripMenuItem.BackColor = Color.Red;
+            черныйСписокToolStripMenuItem.BackColor = Color.Black;
+            LoadData();
+        }
+
+        private void черныйСписокToolStripMenuItem_Click(object sender, EventArgs e) // Черный список
+        {
+            поставщикиToolStripMenuItem.BackColor = Color.Black;
+            черныйСписокToolStripMenuItem.BackColor = Color.Red;
+            LoadBlackList();
         }
     }
 }

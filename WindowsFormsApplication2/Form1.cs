@@ -22,7 +22,7 @@ namespace WindowsFormsApplication2
         {
             InitializeComponent();
             // Мой ключ для АПИ
-            string myAPI = "";
+           // string myAPI = "";
         }
 
 

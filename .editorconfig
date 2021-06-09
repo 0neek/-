@@ -1,0 +1,4 @@
+﻿[*.cs]
+
+# CS2001: Не удалось найти исходный файл "C:\Users\50we\Desktop\эт\WindowsFormsApplication2\WindowsFormsApplication2\MainDataDataSet2.Designer.cs".
+dotnet_diagnostic.CS2001.severity = error
